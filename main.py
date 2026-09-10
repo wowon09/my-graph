@@ -80,8 +80,8 @@ try:
         # 그래프 출력
         st.plotly_chart(fig, use_container_width=True)
         
-        # '이 그래프로 알 수 있는 것' 문구 입력 자리
-        st.info("💡 **이 그래프로 알 수 있는 것:** ")
+        # '이 그래프로 알 수 있는 것' 문구 출력
+        st.info("💡 **이 그래프로 알 수 있는 것:** 하루 영화 관객 수 10위까지의 영화들을 알 수 있다.")
 
     st.markdown("---")
 
