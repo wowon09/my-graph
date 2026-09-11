@@ -221,11 +221,60 @@ try:
     st.markdown("---")
 
     # -------------------------------------------------------------------
-    # 구역 4: 추후 그래프 추가용 예시 공간
+    # 구역 4: 기간 내 관객 수 TOP 10 영화 가로 막대그래프
     # -------------------------------------------------------------------
-    st.header("📌 Section 4. (추가 예정) 시간 흐름에 따른 추가 시각화")
+    st.header("📌 Section 4. 기간 내 총 관객 수 TOP 10 영화")
+    
+    # 영화별 총 일관객 수 및 10위권 진입 날수(차트인 일수) 집계
+    movie_summary = df.groupby('영화명').agg(
+        총일관객=('일관객', 'sum'),
+        차트인일수=('날짜', 'nunique')
+    ).reset_index()
+    
+    # 총 일관객 기준 상위 10개 영화 선택
+    top10_movies = movie_summary.nlargest(10, '총일관객').sort_values('총일관객', ascending=True)
+    
+    # 가로 막대그래프(Horizontal Bar Chart) 생성
+    fig4 = px.bar(
+        top10_movies,
+        x='총일관객',
+        y='영화명',
+        orientation='h',
+        title="<b>기간 내 총 관객 수 Top 10 영화 (10위권 차트인 일수 포함)</b>",
+        labels={'총일관객': '총 관객 수(명)', '영화명': '영화 제목'},
+        color='총일관객',
+        color_continuous_scale='Reds'
+    )
+    
+    # 마우스 호버 시 영화명, 총 관객수, 10위권 안 든 날수 표기
+    fig4.update_traces(
+        customdata=top10_movies[['차트인일수']],
+        hovertemplate="<b>영화명:</b> %{y}<br><b>총 관객 수:</b> %{x:,}명<br><b>10위권 진입 날수:</b> %{customdata[0]}일<extra></extra>"
+    )
+    
+    fig4.update_layout(
+        xaxis_title="총 관객 수 (명)",
+        yaxis_title="영화 제목",
+        template="plotly_white",
+        height=550,
+        coloraxis_showscale=False
+    )
+    
+    # 그래프 출력
+    st.plotly_chart(fig4, use_container_width=True)
+    
+    # '이 그래프로 알 수 있는 것' 문구 입력 자리
+    st.info("💡 **이 그래프로 알 수 있는 것:** ")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------------
+    # 구역 5: 추후 그래프 추가용 예시 공간
+    # -------------------------------------------------------------------
+    st.header("📌 Section 5. (추가 예정) 시간 흐름에 따른 추가 시각화")
     st.text("앞으로 새로운 그래프가 들어올 구역입니다.")
     st.info("💡 **이 그래프로 알 수 있는 것:** ")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
+    
