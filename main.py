@@ -277,4 +277,54 @@ try:
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
-    
+    # -------------------------------------------------------------------
+# 구역 5: 월 × 요일별 관객 수 합계 히트맵 (Heatmap)
+# -------------------------------------------------------------------
+st.header("📌 Section 5. 월 × 요일별 관객 수 분포 히트맵")
+
+# 1. 월 및 요일 파생변수 생성
+df['월'] = df['날짜'].dt.month.astype(str) + "월"
+
+# 2. 요일 매핑 및 월요일~일요일 순서 정렬 지정
+weekday_order = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+weekday_map = {0: '월요일', 1: '화요일', 2: '수요일', 3: '목요일', 4: '금요일', 5: '토요일', 6: '일요일'}
+df['요일'] = df['날짜'].dt.weekday.map(weekday_map)
+
+# 3. 1월~12월 순서 정렬 리스트
+month_order = [f"{m}월" for m in range(1, 13)]
+
+# 4. 월 × 요일 피벗 테이블 집계 (일관객 합계)
+heatmap_df = df.pivot_table(
+    index='월',
+    columns='요일',
+    values='일관객',
+    aggfunc='sum'
+).reindex(index=month_order, columns=weekday_order).fillna(0)
+
+# 5. Plotly 히트맵 생성 (진할수록 관객 수가 많도록 Reds 컬러스케일 적용)
+fig5 = px.imshow(
+    heatmap_df,
+    labels=dict(x="요일", y="월", color="총 관객 수(명)"),
+    x=weekday_order,
+    y=month_order,
+    color_continuous_scale="Reds",
+    title="<b>월 × 요일별 일관객 합계 히트맵</b>"
+)
+
+# 6. 마우스 호버(Tooltip) 설정
+fig5.update_traces(
+    hovertemplate="<b>%{y} %{x}</b><br>총 관객 수: %{z:,}명<extra></extra>"
+)
+
+fig5.update_layout(
+    xaxis_title="요일",
+    yaxis_title="월",
+    template="plotly_white",
+    height=600
+)
+
+# 7. Streamlit 그래프 출력
+st.plotly_chart(fig5, use_container_width=True)
+
+# 설명 문구 안내 상자
+st.info("💡 **이 그래프로 알 수 있는 것:** ")
